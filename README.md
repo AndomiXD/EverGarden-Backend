@@ -23,6 +23,8 @@ EverGarden is a MERN-stack website that allows users to grow their own garden. U
 * User will be rewarded after harvesting a plant
 * User can share their progress to other users
 
+A Trello board was used to track development progress and can be viewed [here](https://trello.com/b/tQZMG1jD/evergarden).
+
 ### ***Deployed version***
 ##### [EverGarden]()
 
@@ -31,5 +33,6 @@ EverGarden is a MERN-stack website that allows users to grow their own garden. U
 * NodeJS, Cors, Express, Mongoose, MongoDB, Morgan
 
 ### ***Screenshots***
-
-![ERD]()
+![WireFrame](./images/wireframe.png)
+![ERD](./images/ERD.png)
+![componentHierarchy](./images/Component.png)
