@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 
 const gardenSchema = new Schema(
   {
-    name: { type: String, required: true },
+    name: { type: String, required: true, default: "My Garden" },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -16,7 +16,7 @@ const gardenSchema = new Schema(
         required: true,
       },
     ],
-    description: { type: Number, required: true, default: 0 },
+    description: { type: String, required: true, default: "A beautiful garden waiting to bloom" },
   },
   { timestamps: true }
 )
