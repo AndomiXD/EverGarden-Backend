@@ -4,6 +4,8 @@ const cors = require("cors")
 
 const AuthRouter = require("./routes/AuthRouter")
 
+const PlantRouter = require("./routes/PlantRouter")
+
 const PORT = process.env.PORT || 3000
 
 const db = require("./db")
@@ -16,6 +18,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
 app.use("/auth", AuthRouter)
+
+app.use("/plants", PlantRouter)
 
 app.use("/", (req, res) => {
   res.send(`Connected!`)
