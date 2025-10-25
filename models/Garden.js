@@ -16,7 +16,7 @@ const gardenSchema = new Schema(
         required: true,
       },
     ],
-    description: { type: Number, required: true },
+    description: { type: Number, required: true, default: 0 },
   },
   { timestamps: true }
 )
