@@ -6,7 +6,7 @@ const plantSchema = new Schema(
     type: { type: String, required: true },
     cost: { type: Number, required: true },
     reward: { type: Number, required: true },
-    expectHarvest: { type: Date, required: true },
+    expectHarvest: { type: Date, required: true, default: Date.now() },
   },
   { timestamps: true }
 )
