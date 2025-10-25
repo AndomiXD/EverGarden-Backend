@@ -1,10 +1,10 @@
 const router = require("express").Router()
-const { addPlant, getAllPlants } = require("../controllers/PlantController")
+const controller = require("../controllers/PlantController")
 
 // POST /plants/add - Add a new plant
-router.post("/add", addPlant)
+router.post("/add", controller.addPlant)
 
 // GET /plants/all - Get all plants
-router.get("/all", getAllPlants)
+router.get("/all", controller.getAllPlants)
 
 module.exports = router
