@@ -1,7 +1,10 @@
 const router = require("express").Router()
-const { addPlant } = require("../controllers/PlantController")
+const { addPlant, getAllPlants } = require("../controllers/PlantController")
 
-// POST /plants - Add a new plant
+// POST /plants/add - Add a new plant
 router.post("/add", addPlant)
+
+// GET /plants/all - Get all plants
+router.get("/all", getAllPlants)
 
 module.exports = router

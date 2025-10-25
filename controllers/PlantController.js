@@ -15,4 +15,13 @@ const addPlant = async (req, res) => {
   }
 }
 
-module.exports = { addPlant }
+const getAllPlants = async (req, res) => {
+  try {
+    const plants = await Plant.find({})
+    res.status(200).json(plants)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
+module.exports = { addPlant, getAllPlants }
