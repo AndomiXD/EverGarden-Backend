@@ -6,9 +6,10 @@ const createGarden = async (req, res) => {
 
     const existing = await Garden.findOne({ owner: userId })
     if (existing) {
-      return res
-        .status(200)
-        .json({ message: "Garden already exists!", garden: existing })
+      return res.status(200).json({
+        message: "Garden already exists! Or does not!",
+        garden: existing,
+      })
     }
 
     const garden = await Garden.create({
@@ -41,24 +42,24 @@ const plantSeed = async (req, res) => {
     const { plantId, position } = req.body
 
     const user = await User.findById(userId)
+
     const plantData = await Plant.findById(plantId)
     if (!plantData) return res.status(404).json({ error: "Plant not found" })
 
-    // Check balance
     if (user.balance < plantData.cost)
+      // Check balance
       return res.status(400).json({ error: "Not enough balance" })
 
-    // Find the user's garden
-    const garden = await Garden.findOne({ owner: userId })
+    const garden = await Garden.findOne({ owner: userId }) // Find the user's garden
     if (!garden) return res.status(404).json({ error: "Garden not found" })
 
-    // Check if the position is already taken
     const slotTaken = garden.plants.find((p) => p.position === position)
     if (slotTaken)
+      // Check if the position is already taken
       return res.status(400).json({ error: "That spot is already planted!" })
 
     const now = new Date()
-    const growDuration = 1000 * 30
+    const growDuration = 1000 * (parseInt(plantData.reward) * 2)
 
     const newPlant = {
       plantRef: plantData._id,
@@ -71,7 +72,7 @@ const plantSeed = async (req, res) => {
     garden.plants.push(newPlant)
     await garden.save()
 
-    user.balance = user.balance - plantData.cost
+    user.balance = parseInt(user.balance) - parseInt(plantData.cost)
     await user.save()
 
     res.status(200).json({
@@ -91,19 +92,21 @@ const updateTimeLeft = async (req, res) => {
     const { position } = req.body // which grid cell
 
     const garden = await Garden.findOne({ owner: userId })
+
     const plantSlot = garden.plants.find((p) => p.position === position)
 
-    // Calculate remaining time
     const now = new Date()
-    const remaining =
+    const remaining = // Calculate remaining time
       new Date(plantSlot.expectHarvest).getTime() - now.getTime()
     plantSlot.timeLeft = remaining > 0 ? remaining : 0
 
     await garden.save()
+    const allplants = garden.plants
 
     res.status(200).json({
       message: "Time left updated successfully!",
       timeLeft: plantSlot.timeLeft,
+      allplants,
     })
   } catch (error) {
     console.error("Error updating time left:", error)
