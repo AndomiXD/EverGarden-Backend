@@ -1,21 +1,29 @@
 const { Garden, Plant } = require("../models")
 
 const createGarden = async (req, res) => {
-  try{
+  try {
     const userId = res.locals.payload.id
+    if (!userId) {
+      return res.status(401).json({ error: "User authentication required" })
+    }
+
     const existing = await Garden.findOne({ owner: userId })
     if (existing) {
-      return res.json({ message: "Garden already exists!", garden: existing })
+      return res
+        .status(200)
+        .json({ message: "Garden already exists!", garden: existing })
     }
+
     const garden = await Garden.create({
       name: "My Garden",
       owner: userId,
       plants: [],
-      description: 0
+      description: "A beautiful garden waiting to bloom",
     })
-    res.json({ message: "Garden created!", garden})
-  }catch(err){
-    res.status(500).json({message: "Error creating garden"})
+    res.status(201).json({ message: "Garden created successfully!", garden })
+  } catch (error) {
+    console.error("Error in createGarden:", error)
+    res.status(500).json({ error: error.message || "Error creating garden" })
   }
 }
 
