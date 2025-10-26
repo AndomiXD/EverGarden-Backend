@@ -9,5 +9,25 @@ router.post(
   middleware.verifyToken,
   controller.createGarden
 )
-module.exports = router
+router.get(
+  "/myGarden",
+  middleware.stripToken,
+  middleware.verifyToken,
+  controller.showGarden
+)
+// Plant a seed into the user's garden
+router.post(
+  "/plant",
+  middleware.stripToken,
+  middleware.verifyToken,
+  controller.plantSeed
+)
 
+router.put(
+  "/updateTime",
+  middleware.stripToken,
+  middleware.verifyToken,
+  controller.updateTimeLeft
+)
+
+module.exports = router

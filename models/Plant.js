@@ -1,4 +1,5 @@
 const { Schema } = require("mongoose")
+const mongoose = require("mongoose")
 
 const plantSchema = new Schema(
   {
@@ -6,7 +7,9 @@ const plantSchema = new Schema(
     type: { type: String, required: true },
     cost: { type: Number, required: true },
     reward: { type: Number, required: true },
-    expectHarvest: { type: Date, required: true, default: Date.now() },
+    whenPlanted: { type: Date, required: true, default: new Date() },
+    expectHarvest: { type: Number, required: true, default: 0 },
+    timeLeft: { type: Number, required: true, default: 0 },
   },
   { timestamps: true }
 )

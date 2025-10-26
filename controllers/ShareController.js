@@ -2,10 +2,10 @@ const { Share, Garden } = require("../models")
 
 const createShare = async (req, res) => {
   try {
-    const userId = res.locals.payload.id
-    if (!userId) {
-      return res.status(401).json({ error: "User authentication required" })
-    }
+    // const userId = res.locals.payload.id
+    // if (!userId) {
+    //   return res.status(401).json({ error: "User authentication required" })
+    // }
 
     const { title, description } = req.body
 
@@ -15,13 +15,12 @@ const createShare = async (req, res) => {
         .json({ error: "Title and description are required" })
     }
 
-    // Find user's garden
-    const garden = await Garden.findOne({ owner: userId })
-    if (!garden) {
-      return res
-        .status(404)
-        .json({ error: "Garden not found. Create a garden first!" })
-    }
+    // const garden = await Garden.findOne({ owner: userId })
+    // if (!garden) {
+    //   return res
+    //     .status(404)
+    //     .json({ error: "Garden not found. Create a garden first!" })
+    // }
 
     const share = await Share.create({
       title,
@@ -42,8 +41,8 @@ const createShare = async (req, res) => {
 const getAllShares = async (req, res) => {
   try {
     const shares = await Share.find({})
-      .populate("poster", "username") // Get poster's username
-      .populate("garden", "name description") // Get garden details
+      .populate("poster", "username")
+      .populate("garden", "name description")
     res.status(200).json(shares)
   } catch (error) {
     console.error("Error in getAllShares:", error)
@@ -54,9 +53,9 @@ const getAllShares = async (req, res) => {
 const getUserShares = async (req, res) => {
   try {
     const userId = res.locals.payload.id
-    if (!userId) {
-      return res.status(401).json({ error: "User authentication required" })
-    }
+    // if (!userId) {
+    //   return res.status(401).json({ error: "User authentication required" })
+    // }
 
     const shares = await Share.find({ poster: userId }).populate(
       "garden",
