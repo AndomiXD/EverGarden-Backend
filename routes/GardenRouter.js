@@ -17,12 +17,21 @@ router.get(
   controller.getMyGarden
 )
 
+// Plant a seed into the user's garden
 router.post(
   "/plant",
   middleware.stripToken,
   middleware.verifyToken,
   controller.plantSeed
 )
+
+router.put(
+  "/updateTime",
+  middleware.stripToken,
+  middleware.verifyToken,
+  controller.updateTimeLeft
+)
+
 router.post(
   "/remove",
   middleware.stripToken,
@@ -30,5 +39,5 @@ router.post(
   controller.removeSeed
 )
 
-module.exports = router
 
+module.exports = router

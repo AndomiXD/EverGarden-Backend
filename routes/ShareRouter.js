@@ -2,7 +2,7 @@ const router = require("express").Router()
 const controller = require("../controllers/ShareController")
 const middleware = require("../middleware")
 
-// Create a new share post (requires authentication)
+// Create a new share post
 router.post(
   "/create",
   middleware.stripToken,
@@ -18,7 +18,7 @@ router.get(
   controller.getAllShares
 )
 
-// Get user's share posts
+// Get logged-in user share posts
 router.get(
   "/user",
   middleware.stripToken,

@@ -22,9 +22,9 @@ app.use("/plants", PlantRouter)
 app.use("/shares", ShareRouter)
 app.use("/gardens", GardenRouter)
 
-app.use("/", (req, res) => {
-  res.send(`Connected!`)
-})
+// app.use("/", (req, res) => {
+//   res.send(`Connected!`)
+// })
 
 app.listen(PORT, () => {
   console.log(`Running Express server on Port ${PORT} . . .`)

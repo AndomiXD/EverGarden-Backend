@@ -8,8 +8,15 @@ const addPlant = async (req, res) => {
         error: "All fields are required: name, type, cost, reward. ",
       })
     }
-    const plant = await Plant.create({ name, type, cost, reward })
-    res.status(201).json(plant)
+    const plantExists = await Plant.findOne({ name: req.body.name })
+    if (plantExists) {
+      return res.status(400).json({
+        error: "Plant of the same name already exists",
+      })
+    } else {
+      const plant = await Plant.create({ name, type, cost, reward })
+      res.status(201).json(plant)
+    }
   } catch (error) {
     res.status(500).json({ error: error.message })
   }

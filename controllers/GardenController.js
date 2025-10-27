@@ -1,17 +1,15 @@
-const { Garden, Plant } = require("../models")
+const { Garden, Plant, User } = require("../models")
 
 const createGarden = async (req, res) => {
   try {
     const userId = res.locals.payload.id
-    if (!userId) {
-      return res.status(401).json({ error: "User authentication required" })
-    }
 
     const existing = await Garden.findOne({ owner: userId })
     if (existing) {
-      return res
-        .status(200)
-        .json({ message: "Garden already exists!", garden: existing })
+      return res.status(200).json({
+        message: "Garden already exists! Or does not!",
+        garden: existing,
+      })
     }
 
     const garden = await Garden.create({
@@ -28,45 +26,119 @@ const createGarden = async (req, res) => {
 }
 
 const getMyGarden = async (req, res) => {
-  try{
+  try {
     const userId = res.locals.payload.id
-    const garden = awaitGarden.findOne({owner:userId
-  }).populate("plants")
-  if(!garden)return res.status(404).json({message:"No garden yet"})
-res.json(garden)
-}catch (err){
-  console.error(err)
-  res.status(500).json({message: "Error fetching garden"})
-}
+    const garden = await Garden.findOne({owner:userId}).populate("plants")
+
+      if(!garden)return res.status(404).json({message:"No garden yet"})
+
+    res.status(200).send(garden)
+  } catch (error) {
+    console.error(error)
+      res.status(500).json({message: "Error fetching garden"})
+  }
 }
 
 const plantSeed = async (req, res) => {
-try {
-const userId = res.locals.payload.id
-const { seedId } = req. body
+  try {
+    const userId = res.locals.payload.id
+    const { plantId, position } = req.body
 
-const garden = await Garden.findOne({ owner: userId })
-if (!garden) return res.status(404).json({ message:
-"Garden not found" })
+    const user = await User.findById(userId)
 
-const plant = await Plant.findById(seedId)
-if (!plant) return res.status (404).json({ message:
-"Seed not found"})
+    const plantData = await Plant.findById(plantId)
+    if (!plantData) return res.status(404).json({ error: "Plant not found" })
 
-garden.plants.push(plant._id)
-await garden.save()
+    if (user.balance < plantData.cost)
+      // Check balance
+      return res.status(400).json({ error: "Not enough balance" })
 
-const populated = await Garden.findById(garden. _id).populate("plants")
-res. json({message: "Seed planted", garden: populated })
-} catch (err) {
-console.error(err)
-res. status (500).json({message: "Error planting seed"})
+    const garden = await Garden.findOne({ owner: userId }) // Find the user's garden
+    if (!garden) return res.status(404).json({ error: "Garden not found" })
+
+    const slotTaken = garden.plants.find((p) => p.position === position)
+    if (slotTaken)
+      // Check if the position is already taken
+      return res.status(400).json({ error: "That spot is already planted!" })
+
+    const now = new Date()
+    const growDuration = 1000 * (parseInt(plantData.reward) * 2)
+
+    const newPlant = {
+      plantRef: plantData._id,
+      position,
+      whenPlanted: now,
+      expectHarvest: new Date(now.getTime() + growDuration),
+      timeLeft: growDuration,
+    }
+
+    garden.plants.push(newPlant)
+    await garden.save()
+
+    user.balance = parseInt(user.balance) - parseInt(plantData.cost)
+    await user.save()
+
+    res.status(200).json({
+      message: `${plantData.name} planted successfully!`,
+      garden,
+      balance: user.balance,
+    })
+  } catch (error) {
+    console.error("Error planting seed:", error)
+    res.status(500).json({ error: error.message })
+  }
 }
+
+const updateTimeLeft = async (req, res) => {
+  try {
+    const userId = res.locals.payload.id
+    const { position } = req.body // which grid cell
+
+    const garden = await Garden.findOne({ owner: userId })
+
+    const plantSlot = garden.plants.find((p) => p.position === position)
+
+    const now = new Date()
+    const remaining = // Calculate remaining time
+      new Date(plantSlot.expectHarvest).getTime() - now.getTime()
+    plantSlot.timeLeft = remaining > 0 ? remaining : 0
+
+    await garden.save()
+    const allplants = garden.plants
+
+    res.status(200).json({
+      message: "Time left updated successfully!",
+      timeLeft: plantSlot.timeLeft,
+      allplants,
+    })
+  } catch (error) {
+    console.error("Error updating time left:", error)
+    res.status(500).json({ error: error.message })
+  }
 }
+
+// const plantSeed = async (req, res) => {
+// try {
+// const userId = res.locals.payload.id
+// const { seedId } = req. body
+
+// const garden = await Garden.findOne({ owner: userId })
+// const plant = await Plant.findById(seedId)
+
+
+// garden.plants.push(plant._id)
+// await garden.save()
+
+// const populated = await Garden.findById(garden. _id).populate("plants")
+// res. json({message: "Seed planted", garden: populated })
+// } catch (err) {
+// console.error(err)
+// res. status (500).json({message: "Error planting seed"})
+// }
+// }
 
 const removeSeed = async (req, res) =>{
 try {
-
 const userId = res.locals.payload.id
 const { index } = req. body
 
@@ -89,6 +161,7 @@ res.status(500).json({ message: "Error removing seed"})
 module.exports = {
 createGarden,
 getMyGarden,
+updateTimeLeft,
 plantSeed,
 removeSeed
 }
