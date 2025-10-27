@@ -32,12 +32,11 @@ router.put(
   controller.updateTimeLeft
 )
 
-router.post(
+router.delete(
   "/remove",
   middleware.stripToken,
   middleware.verifyToken,
   controller.removeSeed
 )
-
 
 module.exports = router
