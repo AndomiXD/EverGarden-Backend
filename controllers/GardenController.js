@@ -25,7 +25,6 @@ const createGarden = async (req, res) => {
   }
 }
 
-
 const getMyGarden = async (req, res) => {
   try {
     const userId = res.locals.payload.id
@@ -35,7 +34,9 @@ const getMyGarden = async (req, res) => {
       "plants.plantRef"
     )
 
-    if (!garden) return res.status(404).json({ error: "Garden not found" })
+    if (!garden) {
+      return res.status(404).json({ error: "Garden not found" })
+    }
 
     let totalReward = 0
     const now = new Date()
@@ -44,18 +45,28 @@ const getMyGarden = async (req, res) => {
 
     for (const plantSlot of garden.plants) {
       const plantData = await Plant.findById(plantSlot.plantRef)
-      if (!plantData) continue
+      if (!plantData) {
+        continue
+      }
 
       const timeRemaining =
         new Date(plantSlot.expectHarvest).getTime() - now.getTime()
 
       if (timeRemaining <= 0) {
-        totalReward += plantData.reward
+        totalReward = totalRewards + plantData.reward
       } else {
         plantSlot.timeLeft = timeRemaining
         updatedPlants.push(plantSlot)
       }
     }
+
+    // garden.plants.forEach(async (plantSlot) => (
+    //  await Plant.findById(plantSlot.plantRef))
+    // forEach did not work... why?
+    // Reason: Using async/await directly with Array.forEach() in JS does not work as expected for sequential asynchronous operations.
+    // While you can declare the callback function of forEach as async, the forEach method itself does not wait for the promises returned
+    // by the async callbacks to resolve before moving to the next iteration or completing the loop.
+    // This means that any await calls within the forEach callback will not pause the execution of the forEach loop itself.
 
     if (totalReward > 0) {
       user.balance += totalReward
@@ -87,19 +98,23 @@ const plantSeed = async (req, res) => {
     const user = await User.findById(userId)
 
     const plantData = await Plant.findById(plantId)
-    if (!plantData) return res.status(404).json({ error: "Plant not found" })
+    if (!plantData) {
+      return res.status(404).json({ error: "Plant not found" })
+    }
 
-    if (user.balance < plantData.cost)
+    if (user.balance < plantData.cost) {
       // Check balance
       return res.status(400).json({ error: "Not enough balance" })
+    }
 
     const garden = await Garden.findOne({ owner: userId }) // Find the user's garden
     if (!garden) return res.status(404).json({ error: "Garden not found" })
 
     const slotTaken = garden.plants.find((p) => p.position === position)
-    if (slotTaken)
+    if (slotTaken) {
       // Check if the position is already taken
       return res.status(400).json({ error: "That spot is already planted!" })
+    }
 
     const now = new Date()
     const growDuration = 1000 * (parseInt(plantData.reward) * 2)
@@ -128,7 +143,6 @@ const plantSeed = async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 }
-
 
 const updateTimeLeft = async (req, res) => {
   try {
