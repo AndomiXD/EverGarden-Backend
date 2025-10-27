@@ -25,14 +25,17 @@ const createGarden = async (req, res) => {
   }
 }
 
-const showGarden = async (req, res) => {
+const getMyGarden = async (req, res) => {
   try {
     const userId = res.locals.payload.id
-    const garden = await Garden.findOne({ owner: userId })
+    const garden = await Garden.findOne({owner:userId}).populate("plants")
+
+      if(!garden)return res.status(404).json({message:"No garden yet"})
 
     res.status(200).send(garden)
   } catch (error) {
     console.error(error)
+      res.status(500).json({message: "Error fetching garden"})
   }
 }
 
@@ -114,4 +117,53 @@ const updateTimeLeft = async (req, res) => {
   }
 }
 
-module.exports = { createGarden, showGarden, plantSeed, updateTimeLeft }
+// const plantSeed = async (req, res) => {
+// try {
+// const userId = res.locals.payload.id
+// const { seedId } = req. body
+
+// const garden = await Garden.findOne({ owner: userId })
+// const plant = await Plant.findById(seedId)
+
+
+// garden.plants.push(plant._id)
+// await garden.save()
+
+// const populated = await Garden.findById(garden. _id).populate("plants")
+// res. json({message: "Seed planted", garden: populated })
+// } catch (err) {
+// console.error(err)
+// res. status (500).json({message: "Error planting seed"})
+// }
+// }
+
+const removeSeed = async (req, res) =>{
+try {
+const userId = res.locals.payload.id
+const { index } = req. body
+
+const garden = await Garden.findOne({owner: userId})
+if (!garden) return res.status(404).json({ message: "Garden not found"})
+
+if (typeof index !== "number" || index < 0 || index >= garden.plants.length){
+return res.status (400).json({ message: "Invalid index" })
+}
+garden.plants.splice (index, 1)
+await garden.save()
+
+const populated = await Garden.findById(garden._id).populate("plants")
+res. json({ message: "Seed removed", garden: populated })
+} catch (err) {
+console.error(err)
+res.status(500).json({ message: "Error removing seed"})
+}
+}
+module.exports = {
+createGarden,
+getMyGarden,
+updateTimeLeft,
+plantSeed,
+removeSeed
+}
+
+
