@@ -19,7 +19,7 @@ EverGarden is a MERN-stack website that allows users to grow their own garden. U
 * User can plant seeds on their garden
 * User can remove seeds from their garden
 * User will be notified if their harvest has completed
-* User can harvest their plant upon fully growing
+* User's plants will be harvested upon fully growing
 * User will be rewarded after harvesting a plant
 * User can share their progress to other users
 

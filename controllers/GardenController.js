@@ -3,20 +3,20 @@ const { Garden, Plant, User } = require("../models")
 const createGarden = async (req, res) => {
   try {
     const userId = res.locals.payload.id
+    const { name, description } = req.body
 
     const existing = await Garden.findOne({ owner: userId })
     if (existing) {
       return res.status(200).json({
-        message: "Garden already exists! Or does not!",
-        garden: existing,
+        message: "Garden already exists!",
+        garden: existing.name,
       })
     }
 
     const garden = await Garden.create({
-      name: "My Garden",
+      name: name,
       owner: userId,
-      plants: [],
-      description: "A beautiful garden waiting to bloom",
+      description: description,
     })
     res.status(201).json({ message: "Garden created successfully!", garden })
   } catch (error) {
@@ -43,20 +43,20 @@ const getMyGarden = async (req, res) => {
 
     const updatedPlants = []
 
-    for (const plantSlot of garden.plants) {
-      const plantData = await Plant.findById(plantSlot.plantRef)
+    for (const plant of garden.plants) {
+      const plantData = await Plant.findById(plant.plantRef)
       if (!plantData) {
         continue
       }
 
       const timeRemaining =
-        new Date(plantSlot.expectHarvest).getTime() - now.getTime()
+        new Date(plant.expectHarvest).getTime() - now.getTime()
 
       if (timeRemaining <= 0) {
-        totalReward = totalRewards + plantData.reward
+        totalReward = totalReward + plantData.reward
       } else {
-        plantSlot.timeLeft = timeRemaining
-        updatedPlants.push(plantSlot)
+        plant.timeLeft = timeRemaining
+        updatedPlants.push(plant)
       }
     }
 
@@ -183,7 +183,7 @@ const updateTimeLeft = async (req, res) => {
 const removeSeed = async (req, res) => {
   try {
     const userId = res.locals.payload.id
-    const { position } = req.body // Position on the 4x4 grid
+    const { position } = req.body // Position on the grid
 
     const garden = await Garden.findOne({ owner: userId })
     if (!garden) return res.status(404).json({ error: "Garden not found" })
@@ -193,7 +193,7 @@ const removeSeed = async (req, res) => {
     if (plantIndex === -1)
       return res.status(400).json({ error: "No plant found at that position" })
 
-    const removed = garden.plants[plantIndex]
+    const removedPlant = garden.plants[plantIndex]
 
     // Remove the plant from garden
     garden.plants.splice(plantIndex, 1)
@@ -201,7 +201,7 @@ const removeSeed = async (req, res) => {
 
     res.status(200).json({
       message: "Plant removed successfully!",
-      removedPlant: removed,
+      removedPlant: removedPlant,
       garden,
     })
   } catch (error) {
