@@ -53,7 +53,7 @@ const getMyGarden = async (req, res) => {
         new Date(plantSlot.expectHarvest).getTime() - now.getTime()
 
       if (timeRemaining <= 0) {
-        totalReward = totalRewards + plantData.reward
+        totalReward = totalReward + plantData.reward
       } else {
         plantSlot.timeLeft = timeRemaining
         updatedPlants.push(plantSlot)
@@ -180,22 +180,39 @@ const updateTimeLeft = async (req, res) => {
   }
 }
 
+// const getGardenById = async (req, res) => {
+//   try {
+//     const { id } = req.params
+
+
+//     const garden = await Garden.findById(id).populate("plants.plantRef")
+
+//     if (!garden) {
+//       return res.status(404).json({ message: "Garden not found" })
+//     }
+
+//     res.status(200).json(garden)
+//   } catch (error) {
+//     console.error("Error fetching garden by ID:", error)
+//     res.status(500).json({ message: "Error fetching garden by ID" })
+//   }
+// }
 const removeSeed = async (req, res) => {
   try {
     const userId = res.locals.payload.id
-    const { position } = req.body // Position on the 4x4 grid
+    const { position } = req.body
 
     const garden = await Garden.findOne({ owner: userId })
     if (!garden) return res.status(404).json({ error: "Garden not found" })
 
-    // Check if position exists
+
     const plantIndex = garden.plants.findIndex((p) => p.position === position)
     if (plantIndex === -1)
       return res.status(400).json({ error: "No plant found at that position" })
 
     const removed = garden.plants[plantIndex]
 
-    // Remove the plant from garden
+
     garden.plants.splice(plantIndex, 1)
     await garden.save()
 
@@ -216,4 +233,5 @@ module.exports = {
   updateTimeLeft,
   plantSeed,
   removeSeed,
+  getGardenById
 }

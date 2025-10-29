@@ -3,6 +3,7 @@ const middleware = require("../middleware")
 const controller = require("../controllers/GardenController")
 
 //POST  create garden
+// router.get("/:id", controller.getGardenById)
 router.post(
   "/create",
   middleware.stripToken,
