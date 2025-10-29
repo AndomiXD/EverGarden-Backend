@@ -3,7 +3,7 @@ const { Garden, Plant, User } = require("../models")
 const createGarden = async (req, res) => {
   try {
     const userId = res.locals.payload.id
-    const { name, description } = req.body
+    const user = await User.findById(userId)
 
     const existing = await Garden.findOne({ owner: userId })
     if (existing) {
@@ -14,9 +14,8 @@ const createGarden = async (req, res) => {
     }
 
     const garden = await Garden.create({
-      name: name,
+      name: `${user.username}'s Garden`,
       owner: userId,
-      description: description,
     })
     res.status(201).json({ message: "Garden created successfully!", garden })
   } catch (error) {
@@ -103,7 +102,7 @@ const plantSeed = async (req, res) => {
       res.status(404).json({ error: "Plant not found" })
     }
 
-    if (user.balance < plantData.cost) {
+    if (user.balance <= plantData.cost) {
       res.status(400).json({ error: "Not enough balance" })
     }
 
@@ -119,7 +118,7 @@ const plantSeed = async (req, res) => {
     }
 
     const now = new Date()
-    const growDuration = 1000 * (parseInt(plantData.reward) * 2)
+    const growDuration = 1000 * (parseInt(plantData.reward) * 0.5)
 
     const newPlant = {
       plantRef: plantData._id,
@@ -210,7 +209,7 @@ const harvestPlant = async (req, res) => {
       res.status(400).json({ error: "This plant is not ready yet!" })
 
     const plantData = await Plant.findById(plantSlot.plantRef)
-    user.balance = user.balance + plantData.reward
+    user.balance += plantData.reward
 
     garden.plants.splice(plantIndex, 1)
     await user.save()
