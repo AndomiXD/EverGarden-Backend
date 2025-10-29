@@ -3,20 +3,20 @@ const middleware = require("../middleware")
 
 const Register = async (req, res) => {
   try {
-    // Extracts the necessary fields from the request body
+
     const { email, password, username } = req.body
-    // Hashes the provided password
+
     let passwordDigest = await middleware.hashPassword(password)
-    // Checks if there has already been a user registered with that email
+
     let existingUser = await User.exists({ email })
     if (existingUser) {
       return res
         .status(400)
         .send("A user with that email has already been registered!")
     } else {
-      // Creates a new user
+
       const user = await User.create({ username, email, passwordDigest })
-      // Sends the user as a response
+
       res.status(200).send(user)
     }
   } catch (error) {
@@ -26,24 +26,25 @@ const Register = async (req, res) => {
 
 const Login = async (req, res) => {
   try {
-    // Extracts the necessary fields from the request body
+
     const { email, password } = req.body
-    // Finds a user by a particular field (in this case, email)
+
     const user = await User.findOne({ email })
-    // Checks if the password matches the stored digest
+
     let matched = await middleware.comparePassword(
       password,
       user.passwordDigest
     )
-    // If they match, constructs a payload object of values we want on the front end
+
     if (matched) {
       let payload = {
         id: user._id,
         username: user.username,
         email: user.email,
         balance: user.balance,
+        avatarUrl: user.avatarUrl || ""
       }
-      // Creates our JWT and packages it with our payload to send as a response
+
       let token = middleware.createToken(payload)
       return res.status(200).send({ user: payload, token })
     }
@@ -58,16 +59,16 @@ const Login = async (req, res) => {
 
 const UpdatePassword = async (req, res) => {
   try {
-    // Extracts the necessary fields from the request body
+
     const { oldPassword, newPassword } = req.body
-    // Finds a user by a particular field (in this case, the user's id from the URL param)
+
     let user = await User.findById(req.params.id)
-    // Checks if the password matches the stored digest
+
     let matched = await middleware.comparePassword(
       oldPassword,
       user.passwordDigest
     )
-    // If they match, hashes the new password, updates the db with the new digest, then sends the user as a response
+    
     if (matched) {
       let passwordDigest = await middleware.hashPassword(newPassword)
       user = await User.findByIdAndUpdate(req.params.id, {

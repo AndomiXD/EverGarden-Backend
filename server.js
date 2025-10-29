@@ -19,8 +19,6 @@ app.use(cors())
 app.use(logger("dev"))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-app.use(express.static(path.join(__dirname, "public")))
-app.use(express.static("public"))
 
 
 app.use("/auth", AuthRouter)
@@ -28,6 +26,9 @@ app.use("/plants", PlantRouter)
 app.use("/shares", ShareRouter)
 app.use("/gardens", GardenRouter)
 app.use("/users", UserRouter)
+
+app.use(express.static(path.join(__dirname, "public")))
+app.use(express.static("public"))
 
 // app.use("/", (req, res) => {
 //   res.send(`Connected!`)
