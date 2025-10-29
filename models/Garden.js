@@ -9,6 +9,7 @@ const gardenSchema = new Schema(
       ref: "User",
       required: true,
     },
+
     plants: [
       {
         plantRef: {
@@ -25,12 +26,12 @@ const gardenSchema = new Schema(
         timeLeft: { type: Number, default: 0 }, // milliseconds left if user leaves
       },
     ],
-
     description: {
       type: String,
       required: true,
       default: "A beautiful garden waiting to bloom",
     },
+    autoHarvest: { type: Boolean, default: false },
   },
   { timestamps: true }
 )

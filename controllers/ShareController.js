@@ -2,7 +2,6 @@ const { Share, Garden } = require("../models")
 
 const createShare = async (req, res) => {
   try {
-    const userId = res.locals.payload.id
     const { title, description } = req.body
 
     if (!title || !description) {
@@ -11,7 +10,7 @@ const createShare = async (req, res) => {
         .json({ error: "Title and description are required" })
     }
 
-    const garden = await Garden.findOne({ owner: userId })
+    const garden = await Garden.findOne({ owner: res.locals.payload.id })
     if (!garden) {
       return res
         .status(404)
@@ -21,7 +20,7 @@ const createShare = async (req, res) => {
     const share = await Share.create({
       title,
       description,
-      poster: userId,
+      poster: res.locals.payload.id,
       garden: garden._id,
     })
     const populated = await Share.findById(share._id)
