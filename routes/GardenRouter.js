@@ -2,7 +2,6 @@ const router = require("express").Router()
 const middleware = require("../middleware")
 const controller = require("../controllers/GardenController")
 
-//POST  create garden
 router.post(
   "/create",
   middleware.stripToken,
@@ -39,13 +38,14 @@ router.delete(
   middleware.verifyToken,
   controller.removeSeed
 )
-router.get("/share/:userId", controller.getPublicGarden)
-
 router.put(
   "/toggle-autoHarvest",
   middleware.stripToken,
   middleware.verifyToken,
   controller.toggleAutoHarvest
 )
+
+router.get("/share/:userId", controller.getPublicGarden)
+router.get("/:id", controller.getGardenById)
 
 module.exports = router
