@@ -130,12 +130,16 @@ const plantSeed = async (req, res) => {
     garden.plants.push(newPlant)
     await garden.save()
 
+    const populatedGarden = await Garden.findById(garden._id).populate(
+      "plants.plantRef"
+    )
+
     user.balance = parseInt(user.balance) - parseInt(plantData.cost)
     await user.save()
 
     res.status(200).json({
       message: `${plantData.name} planted successfully!`,
-      garden,
+      garden: populatedGarden,
       balance: user.balance,
     })
   } catch (error) {
@@ -197,7 +201,7 @@ const harvestPlant = async (req, res) => {
     const plantSlot = garden.plants[plantIndex]
     const now = new Date()
 
-    if (now < new Date(plantSlot.expectHarvest))
+    if (now < new Date(plantSlot.expectHarvest) && plantSlot.timeLeft != 0)
       return res.status(400).json({ error: "This plant is not ready yet!" })
 
     const plantData = await Plant.findById(plantSlot.plantRef)
