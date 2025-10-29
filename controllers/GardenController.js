@@ -285,7 +285,7 @@ const toggleAutoHarvest = async (req, res) => {
 
     garden.autoHarvest = !garden.autoHarvest
     await garden.save()
-
+    //to make branch
     res
       .status(200)
       .json({ message: "AutoHarvest toggled", autoHarvest: garden.autoHarvest })
