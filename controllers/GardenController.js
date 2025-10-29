@@ -130,12 +130,16 @@ const plantSeed = async (req, res) => {
     garden.plants.push(newPlant)
     await garden.save()
 
+    const populatedGarden = await Garden.findById(garden._id).populate(
+      "plants.plantRef"
+    )
+
     user.balance = parseInt(user.balance) - parseInt(plantData.cost)
     await user.save()
 
     res.status(200).json({
       message: `${plantData.name} planted successfully!`,
-      garden,
+      garden: populatedGarden,
       balance: user.balance,
     })
   } catch (error) {
