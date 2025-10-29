@@ -68,57 +68,55 @@ const getUserShares = async (req, res) => {
   }
 }
 
-// const updateShare = async (req, res) => {
-//   try {
-//     const userId = res.locals.payload.id
-//     const { id } = req.params
-//     const { title, description } = req.body
+const updateShare = async (req, res) => {
+  try {
+    const userId = res.locals.payload.id
+    const { id } = req.params
+    const { title, description } = req.body
 
-//     const share = await Share.findById(id)
-//     if (!share) return res.status(404).json({ error: "Share not found" })
+    const share = await Share.findById(id)
+    if (!share) return res.status(404).json({ error: "Share not found" })
 
-//     // Only the original poster can edit
-//     if (String(share.poster) !== String(userId)) {
-//       return res.status(403).json({ error: "Not allowed to edit this share" })
-//     }
+    if (String(share.poster) !== String(userId)) {
+      return res.status(403).json({ error: "Not allowed to edit this share" })
+    }
 
-//     if (title != null) share.title = title
-//     if (description != null) share.description = description
-//     await share.save()
+    if (title != null) share.title = title
+    if (description != null) share.description = description
+    await share.save()
 
-//     // populate before returning to client
-//     const populated = await Share.findById(share._id)
-//       .populate("poster", "username")
-//       .populate("garden", "name description")
+    const populated = await Share.findById(share._id)
+      .populate("poster", "username")
+      .populate("garden", "name description")
 
-//     return res.status(200).json({ message: "Share updated", share: populated })
-//   } catch (error) {
-//     console.error("Error in updateShare:", error)
-//     return res.status(500).json({ error: error.message || "Error updating share" })
-//   }
-// }
+    return res.status(200).json({ message: "Share updated", share: populated })
+  } catch (error) {
+    console.error("Error in updateShare:", error)
+    return res.status(500).json({ error: error.message || "Error updating share" })
+  }
+}
 
-// // Delete a share (only by its owner).
-// const deleteShare = async (req, res) => {
-//   try {
-//     const userId = res.locals.payload.id
-//     const { id } = req.params
 
-//     const share = await Share.findById(id)
-//     if (!share) return res.status(404).json({ error: "Share not found" })
+const deleteShare = async (req, res) => {
+  try {
+    const userId = res.locals.payload.id
+    const { id } = req.params
 
-//     // Only the original poster can delete
-//     if (String(share.poster) !== String(userId)) {
-//       return res.status(403).json({ error: "Not allowed to delete this share" })
-//     }
+    const share = await Share.findById(id)
+    if (!share) return res.status(404).json({ error: "Share not found" })
 
-//     await share.deleteOne()
-//     return res.status(200).json({ success: true, message: "Share deleted" })
-//   } catch (error) {
-//     console.error("Error in deleteShare:", error)
-//     return res.status(500).json({ error: error.message || "Error deleting share" })
-//   }
-// }
+
+    if (String(share.poster) !== String(userId)) {
+      return res.status(403).json({ error: "Not allowed to delete this share" })
+    }
+
+    await share.deleteOne()
+    return res.status(200).json({ success: true, message: "Share deleted" })
+  } catch (error) {
+    console.error("Error in deleteShare:", error)
+    return res.status(500).json({ error: error.message || "Error deleting share" })
+  }
+}
 
 module.exports = {
   createShare,
