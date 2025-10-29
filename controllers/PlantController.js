@@ -2,10 +2,10 @@ const { Plant } = require("../models")
 
 const addPlant = async (req, res) => {
   try {
-    const { name, type, cost, reward } = req.body
-    if (!name || !type || !cost || !reward) {
+    const { name, type, cost, reward, image } = req.body
+    if (!name || !cost || !reward || !image) {
       return res.status(400).json({
-        error: "All fields are required: name, type, cost, reward. ",
+        error: "All fields are required: name, type, cost, reward, image. ",
       })
     }
     const plantExists = await Plant.findOne({ name: req.body.name })
@@ -14,7 +14,7 @@ const addPlant = async (req, res) => {
         error: "Plant of the same name already exists",
       })
     } else {
-      const plant = await Plant.create({ name, type, cost, reward })
+      const plant = await Plant.create({ name, type, cost, reward, image })
       res.status(201).json(plant)
     }
   } catch (error) {
