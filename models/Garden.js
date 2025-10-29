@@ -31,7 +31,7 @@ const gardenSchema = new Schema(
       required: true,
       default: "A beautiful garden waiting to bloom",
     },
-    autoHarvest: { type: Boolean, default: true },
+    autoHarvest: { type: Boolean, default: false },
   },
   { timestamps: true }
 )

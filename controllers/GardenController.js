@@ -197,7 +197,7 @@ const harvestPlant = async (req, res) => {
     const plantSlot = garden.plants[plantIndex]
     const now = new Date()
 
-    if (now < new Date(plantSlot.expectHarvest))
+    if (now < new Date(plantSlot.expectHarvest) && plantSlot.timeLeft != 0)
       return res.status(400).json({ error: "This plant is not ready yet!" })
 
     const plantData = await Plant.findById(plantSlot.plantRef)
