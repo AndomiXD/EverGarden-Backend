@@ -1,15 +1,18 @@
 const router = require("express").Router()
-const ctrl = require("../controllers/UserController")
+const controller = require("../controllers/UserController")
 const middleware = require("../middleware")
 
-router.get("/me", middleware.stripToken, middleware.verifyToken, ctrl.getMyProfile)
-router.put("/me", middleware.stripToken, middleware.verifyToken, ctrl.updateMyProfile)
-
-router.put(
-  "/password",
+router.get(
+  "/me",
   middleware.stripToken,
   middleware.verifyToken,
-  ctrl.updateMyPassword
+  controller.getMyProfile
+)
+router.put(
+  "/me",
+  middleware.stripToken,
+  middleware.verifyToken,
+  controller.updateMyProfile
 )
 
 module.exports = router

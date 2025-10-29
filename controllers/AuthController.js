@@ -3,7 +3,6 @@ const middleware = require("../middleware")
 
 const Register = async (req, res) => {
   try {
-
     const { email, password, username } = req.body
 
     let passwordDigest = await middleware.hashPassword(password)
@@ -14,7 +13,6 @@ const Register = async (req, res) => {
         .status(400)
         .send("A user with that email has already been registered!")
     } else {
-
       const user = await User.create({ username, email, passwordDigest })
 
       res.status(200).send(user)
@@ -26,7 +24,6 @@ const Register = async (req, res) => {
 
 const Login = async (req, res) => {
   try {
-
     const { email, password } = req.body
 
     const user = await User.findOne({ email })
@@ -42,7 +39,7 @@ const Login = async (req, res) => {
         username: user.username,
         email: user.email,
         balance: user.balance,
-        avatarUrl: user.avatarUrl || ""
+        avatarUrl: user.avatarUrl || "",
       }
 
       let token = middleware.createToken(payload)
@@ -59,16 +56,16 @@ const Login = async (req, res) => {
 
 const UpdatePassword = async (req, res) => {
   try {
-
+    const userId = res.locals.payload.id
     const { oldPassword, newPassword } = req.body
 
-    let user = await User.findById(req.params.id)
+    let user = await User.findById(userId)
 
     let matched = await middleware.comparePassword(
       oldPassword,
       user.passwordDigest
     )
-    
+
     if (matched) {
       let passwordDigest = await middleware.hashPassword(newPassword)
       user = await User.findByIdAndUpdate(req.params.id, {

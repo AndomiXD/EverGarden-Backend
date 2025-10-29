@@ -5,14 +5,12 @@ const createShare = async (req, res) => {
     const { title, description } = req.body
 
     if (!title || !description) {
-      return res
-        .status(400)
-        .json({ error: "Title and description are required" })
+      res.status(400).json({ error: "Title and description are required" })
     }
 
     const garden = await Garden.findOne({ owner: res.locals.payload.id })
     if (!garden) {
-      return res
+      res
         .status(404)
         .json({ error: "Garden not found. Create a garden first!" })
     }
@@ -27,10 +25,11 @@ const createShare = async (req, res) => {
       .populate("poster", "username")
       .populate("garden", "name description")
 
-    return res.status(201).json({ message: "Share created successfully!", share })
+    res.status(201).json({ message: "Share created successfully!", share })
   } catch (error) {
     console.error("Error in createShare:", error)
-    return res.status(500)
+    res
+      .status(500)
       .json({ error: error.message || "Error creating share post" })
   }
 }
@@ -41,10 +40,10 @@ const getAllShares = async (req, res) => {
       .populate("poster", "username")
       .populate("garden", "name description")
       .sort({ createdAt: -1 })
-    return res.status(200).json(shares)
+    res.status(200).json(shares)
   } catch (error) {
     console.error("Error in getAllShares:", error)
-    return res.status(500).json({ error: error.message || "Error fetching shares" })
+    res.status(500).json({ error: error.message || "Error fetching shares" })
   }
 }
 
@@ -53,16 +52,14 @@ const getUserShares = async (req, res) => {
     const userId = res.locals.payload.id
 
     const shares = await Share.find({ poster: userId })
-    .populate("poster", "username")
-    .populate(
-      "garden",
-      "name description"
-    )
-    .sort({ createdAt: -1 })
-    return res.status(200).json(shares)
+      .populate("poster", "username")
+      .populate("garden", "name description")
+      .sort({ createdAt: -1 })
+    res.status(200).json(shares)
   } catch (error) {
     console.error("Error in getUserShares:", error)
-    return res.status(500)
+    res
+      .status(500)
       .json({ error: error.message || "Error fetching user shares" })
   }
 }
@@ -74,10 +71,12 @@ const updateShare = async (req, res) => {
     const { title, description } = req.body
 
     const share = await Share.findById(id)
-    if (!share) return res.status(404).json({ error: "Share not found" })
+    if (!share) {
+      res.status(404).json({ error: "Share not found" })
+    }
 
-    if (String(share.poster) !== String(userId)) {
-      return res.status(403).json({ error: "Not allowed to edit this share" })
+    if (share.poster !== userId) {
+      res.status(403).json({ error: "Not allowed to edit this share" })
     }
 
     if (title != null) share.title = title
@@ -88,13 +87,12 @@ const updateShare = async (req, res) => {
       .populate("poster", "username")
       .populate("garden", "name description")
 
-    return res.status(200).json({ message: "Share updated", share: populated })
+    res.status(200).json({ message: "Share updated", share: populated })
   } catch (error) {
     console.error("Error in updateShare:", error)
-    return res.status(500).json({ error: error.message || "Error updating share" })
+    res.status(500).json({ error: error.message || "Error updating share" })
   }
 }
-
 
 const deleteShare = async (req, res) => {
   try {
@@ -102,18 +100,19 @@ const deleteShare = async (req, res) => {
     const { id } = req.params
 
     const share = await Share.findById(id)
-    if (!share) return res.status(404).json({ error: "Share not found" })
+    if (!share) {
+      res.status(404).json({ error: "Share not found" })
+    }
 
-
-    if (String(share.poster) !== String(userId)) {
-      return res.status(403).json({ error: "Not allowed to delete this share" })
+    if (share.poster !== userId) {
+      res.status(403).json({ error: "Not allowed to delete this share" })
     }
 
     await share.deleteOne()
-    return res.status(200).json({ success: true, message: "Share deleted" })
+    res.status(200).json({ success: true, message: "Share deleted" })
   } catch (error) {
     console.error("Error in deleteShare:", error)
-    return res.status(500).json({ error: error.message || "Error deleting share" })
+    res.status(500).json({ error: error.message || "Error deleting share" })
   }
 }
 
@@ -122,5 +121,5 @@ module.exports = {
   getAllShares,
   getUserShares,
   updateShare,
-  deleteShare
+  deleteShare,
 }

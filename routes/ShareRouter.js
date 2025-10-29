@@ -2,7 +2,6 @@ const router = require("express").Router()
 const controller = require("../controllers/ShareController")
 const middleware = require("../middleware")
 
-// Create a new share post
 router.post(
   "/create",
   middleware.stripToken,
@@ -10,7 +9,6 @@ router.post(
   controller.createShare
 )
 
-// Get all share posts (could be used for public if we remove striptoken and verifytoken)
 router.get(
   "/all",
   middleware.stripToken,
@@ -18,7 +16,6 @@ router.get(
   controller.getAllShares
 )
 
-// Get logged-in user share posts
 router.get(
   "/user",
   middleware.stripToken,
