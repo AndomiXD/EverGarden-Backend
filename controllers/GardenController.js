@@ -103,7 +103,6 @@ const plantSeed = async (req, res) => {
     }
 
     if (user.balance < plantData.cost) {
-      // Check balance
       return res.status(400).json({ error: "Not enough balance" })
     }
 
@@ -113,7 +112,7 @@ const plantSeed = async (req, res) => {
 
     const slotTaken = garden.plants.find((plant) => plant.position === position)
     if (slotTaken) {
-      // Check if the position is already taken
+
       return res.status(400).json({ error: "That spot is already planted!" })
     }
 
@@ -167,7 +166,6 @@ const updateTimeLeft = async (req, res) => {
       const updated = { ...plant.toObject(), timeLeft }
       updatedPlants.push(updated)
 
-      // Update in the garden document
       plant.timeLeft = timeLeft
       return plant
     })
@@ -185,6 +183,24 @@ const updateTimeLeft = async (req, res) => {
   }
 }
 
+
+const getGardenById = async (req, res) => {
+  try {
+    const { id } = req.params
+    const garden = await Garden.findById(id).populate("plants.plantRef")
+
+    if (!garden) {
+      return res.status(404).json({ message: "Garden not found" })
+    }
+
+    res.status(200).json(garden)
+  } catch (error) {
+    console.error("Error fetching garden by ID:", error)
+    res.status(500).json({ message: "Error fetching garden by ID" })
+  }
+}
+
+
 const harvestPlant = async (req, res) => {
   try {
     const userId = res.locals.payload.id
@@ -199,13 +215,13 @@ const harvestPlant = async (req, res) => {
       (plant) => plant.position === position
     )
     if (plantIndex === -1)
-      return res.status(400).json({ error: "No plant found at that position" })
+       res.status(400).json({ error: "No plant found at that position" })
 
     const plantSlot = garden.plants[plantIndex]
     const now = new Date()
 
     if (now < new Date(plantSlot.expectHarvest) && plantSlot.timeLeft != 0)
-      return res.status(400).json({ error: "This plant is not ready yet!" })
+       res.status(400).json({ error: "This plant is not ready yet!" })
 
     const plantData = await Plant.findById(plantSlot.plantRef)
     user.balance = user.balance + plantData.reward
@@ -225,10 +241,12 @@ const harvestPlant = async (req, res) => {
   }
 }
 
+
 const removeSeed = async (req, res) => {
   try {
     const userId = res.locals.payload.id
     const { position } = req.body // Position on the grid
+
 
     const garden = await Garden.findOne({ owner: userId })
     if (!garden) return res.status(404).json({ error: "Garden not found" })
@@ -242,7 +260,6 @@ const removeSeed = async (req, res) => {
 
     const removedPlant = garden.plants[plantIndex]
 
-    // Remove the plant from garden
     garden.plants.splice(plantIndex, 1)
     await garden.save()
 
@@ -301,6 +318,7 @@ module.exports = {
   updateTimeLeft,
   plantSeed,
   removeSeed,
+  getGardenById,
   harvestPlant,
   getPublicGarden,
   toggleAutoHarvest,

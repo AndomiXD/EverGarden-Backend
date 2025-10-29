@@ -26,4 +26,19 @@ router.get(
   controller.getUserShares
 )
 
+router.put(
+  "/:id",
+  middleware.stripToken,
+  middleware.verifyToken,
+  controller.updateShare
+)
+
+// Delete a share (only the owner can delete)
+router.delete(
+  "/:id",
+  middleware.stripToken,
+  middleware.verifyToken,
+  controller.deleteShare
+)
+
 module.exports = router
