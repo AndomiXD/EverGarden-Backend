@@ -29,12 +29,12 @@ const updateMyProfile = async (req, res) => {
     const { username, image } = req.body
     const updates = {}
 
-    if (username != null) updates.username = username
-    if (image != null) updates.image = image
+    if (username) updates.username = username
+    if (image) updates.image = image
 
-    const updated = await User.findByIdAndUpdate(userId, updates)
-
+    const updated = await User.findByIdAndUpdate(userId, updates, { new: true })
     if (!updated) return res.status(404).json({ error: "User not found" })
+
     return res.json(updated)
   } catch (error) {
     console.error("updateMyProfile error:", error)

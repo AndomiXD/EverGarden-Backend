@@ -68,7 +68,7 @@ const UpdatePassword = async (req, res) => {
 
     if (matched) {
       let passwordDigest = await middleware.hashPassword(newPassword)
-      user = await User.findByIdAndUpdate(req.params.id, {
+      user = await User.findByIdAndUpdate(userId, {
         passwordDigest,
       })
       let payload = {
