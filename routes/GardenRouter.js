@@ -41,4 +41,11 @@ router.delete(
 )
 router.get("/share/:userId", controller.getPublicGarden)
 
+router.put(
+  "/toggle-autoHarvest",
+  middleware.stripToken,
+  middleware.verifyToken,
+  controller.toggleAutoHarvest
+)
+
 module.exports = router

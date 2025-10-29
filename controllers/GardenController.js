@@ -107,10 +107,11 @@ const plantSeed = async (req, res) => {
       return res.status(400).json({ error: "Not enough balance" })
     }
 
-    const garden = await Garden.findOne({ owner: userId }) // Find the user's garden
+    const garden = await Garden.findOne({ owner: userId })
+
     if (!garden) return res.status(404).json({ error: "Garden not found" })
 
-    const slotTaken = garden.plants.find((p) => p.position === position)
+    const slotTaken = garden.plants.find((plant) => plant.position === position)
     if (slotTaken) {
       // Check if the position is already taken
       return res.status(400).json({ error: "That spot is already planted!" })
@@ -134,7 +135,7 @@ const plantSeed = async (req, res) => {
       "plants.plantRef"
     )
 
-    user.balance = parseInt(user.balance) - parseInt(plantData.cost)
+    user.balance -= plantData.cost
     await user.save()
 
     res.status(200).json({
@@ -194,7 +195,9 @@ const harvestPlant = async (req, res) => {
       "plants.plantRef"
     )
 
-    const plantIndex = garden.plants.findIndex((p) => p.position === position)
+    const plantIndex = garden.plants.findIndex(
+      (plant) => plant.position === position
+    )
     if (plantIndex === -1)
       return res.status(400).json({ error: "No plant found at that position" })
 
@@ -231,7 +234,9 @@ const removeSeed = async (req, res) => {
     if (!garden) return res.status(404).json({ error: "Garden not found" })
 
     // Check if position exists
-    const plantIndex = garden.plants.findIndex((p) => p.position === position)
+    const plantIndex = garden.plants.findIndex(
+      (plant) => plant.position === position
+    )
     if (plantIndex === -1)
       return res.status(400).json({ error: "No plant found at that position" })
 
@@ -272,6 +277,24 @@ const getPublicGarden = async (req, res) => {
   }
 }
 
+const toggleAutoHarvest = async (req, res) => {
+  try {
+    const userId = res.locals.payload.id
+    const garden = await Garden.findOne({ owner: userId })
+    if (!garden) return res.status(404).json({ error: "Garden not found" })
+
+    garden.autoHarvest = !garden.autoHarvest
+    await garden.save()
+
+    res
+      .status(200)
+      .json({ message: "AutoHarvest toggled", autoHarvest: garden.autoHarvest })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: error.message })
+  }
+}
+
 module.exports = {
   createGarden,
   getMyGarden,
@@ -280,4 +303,5 @@ module.exports = {
   removeSeed,
   harvestPlant,
   getPublicGarden,
+  toggleAutoHarvest,
 }
