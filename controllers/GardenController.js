@@ -28,7 +28,6 @@ const createGarden = async (req, res) => {
 const getMyGarden = async (req, res) => {
   try {
     const userId = res.locals.payload.id
-
     const user = await User.findById(userId)
     const garden = await Garden.findOne({ owner: userId }).populate(
       "plants.plantRef"
@@ -37,26 +36,27 @@ const getMyGarden = async (req, res) => {
     if (!garden) {
       return res.status(404).json({ error: "Garden not found" })
     }
-
     let totalReward = 0
     const now = new Date()
 
-    const updatedPlants = []
+    const remainingPlants = []
 
     for (const plant of garden.plants) {
       const plantData = await Plant.findById(plant.plantRef)
       if (!plantData) {
         continue
       }
-
       const timeRemaining =
         new Date(plant.expectHarvest).getTime() - now.getTime()
 
-      if (timeRemaining <= 0) {
+      if (timeRemaining <= 0 && garden.autoHarvest) {
         totalReward = totalReward + plantData.reward
-      } else {
+      } else if (timeRemaining > 0) {
         plant.timeLeft = timeRemaining
-        updatedPlants.push(plant)
+        remainingPlants.push(plant)
+      } else if (!garden.autoHarvest) {
+        plant.timeLeft = 0
+        remainingPlants.push(plant)
       }
     }
 
@@ -73,7 +73,7 @@ const getMyGarden = async (req, res) => {
       await user.save()
     }
 
-    garden.plants = updatedPlants
+    garden.plants = remainingPlants
     await garden.save()
 
     res.status(200).json({
@@ -180,6 +180,44 @@ const updateTimeLeft = async (req, res) => {
   }
 }
 
+const harvestPlant = async (req, res) => {
+  try {
+    const userId = res.locals.payload.id
+    const { position } = req.body
+
+    const user = await User.findById(userId)
+    const garden = await Garden.findOne({ owner: userId }).populate(
+      "plants.plantRef"
+    )
+
+    const plantIndex = garden.plants.findIndex((p) => p.position === position)
+    if (plantIndex === -1)
+      return res.status(400).json({ error: "No plant found at that position" })
+
+    const plantSlot = garden.plants[plantIndex]
+    const now = new Date()
+
+    if (now < new Date(plantSlot.expectHarvest))
+      return res.status(400).json({ error: "This plant is not ready yet!" })
+
+    const plantData = await Plant.findById(plantSlot.plantRef)
+    user.balance = user.balance + plantData.reward
+
+    garden.plants.splice(plantIndex, 1)
+    await user.save()
+    await garden.save()
+
+    res.status(200).json({
+      message: `You harvested ${plantData.name} and earned ${plantData.reward} coins as a reward!`,
+      garden,
+      balance: user.balance,
+    })
+  } catch (error) {
+    console.error("Error harvesting plant:", error)
+    res.status(500).json({ error: error.message })
+  }
+}
+
 const removeSeed = async (req, res) => {
   try {
     const userId = res.locals.payload.id
@@ -210,10 +248,32 @@ const removeSeed = async (req, res) => {
   }
 }
 
+const getPublicGarden = async (req, res) => {
+  try {
+    const { userId } = req.params
+    const garden = await Garden.findOne({ owner: userId }).populate(
+      "plants.plantRef"
+    )
+    if (!garden) return res.status(404).json({ error: "Garden not found" })
+
+    res.status(200).json({
+      owner: garden.owner,
+      name: garden.name,
+      description: garden.description,
+      plants: garden.plants,
+    })
+  } catch (error) {
+    console.error(`Error fetching public view of garden`, error)
+    res.status(500).json({ error: error.message })
+  }
+}
+
 module.exports = {
   createGarden,
   getMyGarden,
   updateTimeLeft,
   plantSeed,
   removeSeed,
+  harvestPlant,
+  getPublicGarden,
 }
