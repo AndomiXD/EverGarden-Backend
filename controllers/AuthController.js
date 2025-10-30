@@ -39,7 +39,7 @@ const Login = async (req, res) => {
         username: user.username,
         email: user.email,
         balance: user.balance,
-        avatarUrl: user.avatarUrl || "",
+        image: user.image || "",
       }
 
       let token = middleware.createToken(payload)
@@ -75,6 +75,7 @@ const UpdatePassword = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
+        image: user.image,
       }
       return res
         .status(200)

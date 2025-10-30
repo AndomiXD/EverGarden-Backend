@@ -96,25 +96,22 @@ const plantSeed = async (req, res) => {
     const { plantId, position } = req.body
 
     const user = await User.findById(userId)
-
     const plantData = await Plant.findById(plantId)
     if (!plantData) {
-      res.status(404).json({ error: "Plant not found" })
+      return res.status(404).json({ error: "Plant not found" })
     }
 
-    if (user.balance <= plantData.cost) {
-      res.status(400).json({ error: "Not enough balance" })
-    }
+    if (user.balance < plantData.cost)
+      return res.status(400).json({ error: "Not enough balance" })
 
     const garden = await Garden.findOne({ owner: userId })
-
     if (!garden) {
-      res.status(404).json({ error: "Garden not found" })
+      return res.status(404).json({ error: "Garden not found" })
     }
 
     const slotTaken = garden.plants.find((plant) => plant.position === position)
     if (slotTaken) {
-      res.status(400).json({ error: "That spot is already planted!" })
+      return res.status(400).json({ error: "That spot is already planted!" })
     }
 
     const now = new Date()
@@ -128,15 +125,15 @@ const plantSeed = async (req, res) => {
       timeLeft: growDuration,
     }
 
+    user.balance -= plantData.cost
+    await user.save()
+
     garden.plants.push(newPlant)
     await garden.save()
 
     const populatedGarden = await Garden.findById(garden._id).populate(
       "plants.plantRef"
     )
-
-    user.balance -= plantData.cost
-    await user.save()
 
     res.status(200).json({
       message: `${plantData.name} planted successfully!`,
@@ -145,7 +142,7 @@ const plantSeed = async (req, res) => {
     })
   } catch (error) {
     console.error("Error planting seed:", error)
-    res.status(500).json({ error: error.message })
+    return res.status(500).json({ error: error.message })
   }
 }
 
