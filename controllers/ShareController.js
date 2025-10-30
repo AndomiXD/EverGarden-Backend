@@ -104,7 +104,7 @@ const deleteShare = async (req, res) => {
       res.status(404).json({ error: "Share not found" })
     }
 
-    if (share.poster !== userId) {
+    if (share.poster.toString() !== userId.toString()) {
       res.status(403).json({ error: "Not allowed to delete this share" })
     }
 
